@@ -1,3 +1,4 @@
+# app/core/database/repositories/movie_repository.py
 from sqlalchemy.orm import Session, contains_eager
 from pegasus_framework.db.repositories.base_repository import BaseRepository
 from app.core.database.models.movies import Movie
@@ -79,6 +80,12 @@ class MovieRepository(BaseRepository[Movie]):
             )
             .select_from(Movie)
             .join(Movie.genre)
+            .where(
+                Movie.habilited.is_(True),
+                Movie.deleted_at.is_(None),
+                Genre.habilited.is_(True),
+                Genre.deleted_at.is_(None)
+            )            
         )
 
         if genre:
@@ -101,7 +108,7 @@ class MovieRepository(BaseRepository[Movie]):
     
     def get_top_by_price(self, n: int = 5):
         smt = (
-            select(Movie)
+            self._base_query()
             .order_by(Movie.price.desc())
             .limit(n)
         )
@@ -121,7 +128,7 @@ class MovieRepository(BaseRepository[Movie]):
                 ) -> list[Movie]:
         
 
-        smt = select(Movie)
+        smt = self._base_query()
 
         order_criteria = [
             Movie.year.asc() if year_order_asc else Movie.year.desc(),
@@ -142,7 +149,11 @@ class MovieRepository(BaseRepository[Movie]):
         )
     
     def get_by_genre_id(self, genre_id: int) -> list[Movie]:
-        smt = select(Movie).where(Movie.genre_id == genre_id)
+        smt = (
+            self._base_query()
+            .where(Movie.genre_id == genre_id)
+        )
+        
         return (
             self.session
             .execute(smt)
