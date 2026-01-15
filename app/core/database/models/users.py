@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database.models.base import Base
 from pegasus_framework.auth.models.users.user_base import BaseUser
 from pegasus_framework.auth.models.users.mixins import AuditableUserMixin
-
+from sqlalchemy.orm import relationship
 
 class User(
     Base,
@@ -22,3 +22,9 @@ class User(
 
     display_name: Mapped[str | None] = mapped_column(String(120))
     favorite_genres: Mapped[str | None]
+
+    sessions = relationship(
+        "UserSession",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )    

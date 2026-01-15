@@ -9,7 +9,7 @@ from sqlalchemy import (
     Numeric,
 )
 from sqlalchemy.orm import validates, relationship
-from pegasus_framework.db.models.base import Base
+from app.core.database.models.base import Base
 
 
 from pegasus_framework.db.models.mixins import AuditMixin

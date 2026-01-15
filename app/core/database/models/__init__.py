@@ -1,8 +1,14 @@
-from .movies import Movie
+from .base import Base
 from .genres import Genre
-from pegasus_framework.db.models.base import Base
+from .movies import Movie
+from .users import User
+from .user_session import UserSession
+
+
 __all__ = [
-    "Movie",
     "Base",
-    "Genre"
+    "Genre",
+    "Movie",
+    "User",
+    "UserSession"
 ]

@@ -1,6 +1,6 @@
 # app/core/database/models/genres.py
 from sqlalchemy.orm import relationship
-from pegasus_framework.db.models.base import Base
+from app.core.database.models.base import Base
 from sqlalchemy import (
     Column, 
     Integer, 

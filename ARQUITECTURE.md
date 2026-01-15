@@ -208,3 +208,15 @@ El flujo lógico completo de una request es el siguiente:
 ```text
 HTTP Schema  →  DTO  →  Entity / Use Case  →  DTO  →  HTTP Response Schema
 ```
+
+# 10 User Domain Ownership Rule
+
+Pegasus Framework define únicamente los contratos abstractos e invariantes relacionados con identidad y autenticación.
+
+La aplicación:
+
+ - define el modelo concreto de usuario
+ - implementa la tabla y las relaciones
+ - define los servicios y casos de uso de negocio
+
+El framework nunca implementa lógica de negocio asociada al dominio User.
