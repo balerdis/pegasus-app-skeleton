@@ -1,0 +1,131 @@
+from app.api.v1.schemas.movies import MovieCreate, MovieUpdate, MovieResponse
+from app.api.v1.schemas.genres.responses import GenreResponse
+from pegasus_framework.business.base_service import BaseService
+from app.core.services.dto.movie.search_dto import MovieSearchDTO
+from app.core.services.dto.movie.report_filter_dto import ReportFilterDTO
+from app.core.services.dto.movie.list_dto import MovieListDTO
+from app.core.services.dto.movie.report_summary_dto import MoviesReportSummaryDTO
+from pegasus_framework.db.unit_of_work.sqlalchemy_uow import SqlAlchemyUnitOfWork
+from app.core.database.repositories.movie_repository import MovieRepository
+
+
+class MovieService(BaseService):
+
+    def create(self, data: MovieCreate) -> MovieResponse:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            movie = repo.create(data.model_dump())
+            uow.commit()     
+            return self._map_movie_to_response(movie)
+            
+    
+    def search(self, 
+               params: MovieSearchDTO
+               ) -> list[MovieResponse]:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            movies = repo.search(
+                search=params.search,
+                year_order_asc=params.year_order_asc,
+                price_order_asc=params.price_order_asc,
+                price_min=params.price_min,
+                price_max=params.price_max,
+                offset=params.offset,
+                fetch=params.fetch
+            )
+            return [self._map_movie_to_response(m) for m in movies]
+    
+    def get_all(self, 
+                params: MovieListDTO
+                ) -> list[MovieResponse]:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            movies = repo.get_all_ordered(
+                title_order_asc=params.title_order_asc,
+                year_order_asc=params.year_order_asc,
+                price_order_asc=params.price_order_asc,
+                offset=params.offset,
+                fetch=params.fetch
+            )
+            return [self._map_movie_to_response(m) for m in movies]
+    
+    def get_reporte_resumen(
+        self
+        , filters: ReportFilterDTO
+    ) -> MoviesReportSummaryDTO:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            reporte = repo.get_reporte_resumen(
+                filters.genre, 
+                filters.director, 
+                filters.year_from, 
+                filters.year_to            
+            )
+            return MoviesReportSummaryDTO(
+                total_movies=reporte.total_movies,
+                total_units=reporte.total_units,
+                total_price=float(reporte.total_price or 0),
+            )
+    
+    def get_top_by_price(
+        self
+        , n: int = 5
+    ) -> list[MovieResponse]:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            movies = repo.get_top_by_price(n)
+            return [self._map_movie_to_response(m) for m in movies]
+    
+    def get_by_id_or_fail(self, id: int) -> MovieResponse:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            m = repo.get_by_id_or_fail(id)
+
+            return self._map_movie_to_response(m)
+    
+    def update(self, id: int, data: MovieUpdate) -> MovieResponse:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            movie = repo.get_by_id_or_fail(id)
+
+            update_data = data.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                setattr(movie, field, value)
+
+            ## No hacer update, el genre ya esta atachado en la sesion y 
+            ## el SqlAlchemy trackea los cambios en el objeto atachado automaticamente    
+            # genre_updated = uow.genres.update(genre)
+            ## El commit de la uow genera el flush automatico antes del commit
+            uow.commit()
+            return self._map_movie_to_response(movie)
+                
+            
+    
+    def delete_by_id(self, id: int, confirm: bool = True) -> None:
+        if not confirm:
+            return
+
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(MovieRepository)
+            movie = repo.get_by_id_or_fail(id)
+            repo.delete(movie)
+            uow.commit()
+
+
+    def _map_movie_to_response(self, m) -> MovieResponse:
+        return MovieResponse(
+            id=m.id,
+            title=m.title,
+            director=m.director,
+            year=m.year,
+            price=m.price,
+            duration=m.duration,
+            rating=m.rating,
+            description=m.description,
+            genre=(
+                    GenreResponse(
+                        id=m.genre.id,
+                        name=m.genre.name
+                    ) if m.genre else None
+                )
+        )

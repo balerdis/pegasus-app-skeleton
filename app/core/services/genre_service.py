@@ -1,0 +1,82 @@
+from app.config.config import config
+from pegasus_framework.business.base_service import BaseService
+from app.api.v1.schemas.genres.create import GenreCreate
+from app.api.v1.schemas.genres.responses import GenreResponse
+from pegasus_framework.db.unit_of_work.sqlalchemy_uow import SqlAlchemyUnitOfWork
+from app.core.database.repositories.genre_repository import GenreRepository
+from app.core.database.repositories.movie_repository import MovieRepository
+
+class GenreService(BaseService):
+    def get_all(self) -> list[GenreResponse]:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(GenreRepository)
+            genres = repo.get_all()
+            return [self._map_genre_to_response(g) for g in genres]
+    
+    def create(self, data: GenreCreate) -> GenreResponse:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(GenreRepository)
+            genre = repo.create(data.model_dump(), "name")  
+            uow.commit()      
+            return self._map_genre_to_response(genre)
+        
+    def get_by_id_or_fail(self, id: int) -> GenreResponse:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(GenreRepository)
+            genre = repo.get_by_id_or_fail(id)
+            return self._map_genre_to_response(genre)
+    
+    def update(self, id: int, data: GenreCreate) -> GenreResponse:
+        with SqlAlchemyUnitOfWork() as uow:
+            repo = uow.repo(GenreRepository)
+            genre = repo.get_by_id_or_fail(id)
+            update_data = data.model_dump(exclude_unset=True)
+
+            for field, value in update_data.items():
+                setattr(genre, field, value)
+                
+            ## No hacer update, el genre ya esta atachado en la sesion y 
+            ## el SqlAlchemy trackea los cambios en el objeto atachado automaticamente    
+            # genre_updated = uow.genres.update(genre)
+            ## El commit de la uow genera el flush automatico antes del commit
+            uow.commit()
+            return self._map_genre_to_response(genre)
+    
+
+    def delete_by_id(self, id: int, confirm: bool = True) -> None:
+        """
+        Elimina un genero, como es una entidad relacionada con peliculas, se realizan algunas operaciones:
+            1.- se revisa si existe una pelicula relacionada, en caso de existir las peliculas involucradas se setean al genero
+            "sin identificar"
+            2.- se elimina el genero
+            TODO: en proximas versiones 
+            1.- se hara soft delete indicando la fecha de borrado
+            2.- se deberá adaptar la consulta de los generos que no se encuentren borrados
+        Args:
+            id (int): id del genero a eliminar
+            confirm (bool, optional): para indicar si se desea realizar el borrado, si no, se emula un borrado. Defaults to True.
+
+        Returns:
+            _type_: No devuelve nada, no hace falta
+        """
+
+        with SqlAlchemyUnitOfWork() as uow:
+            repo_genres = uow.repo(GenreRepository)
+            repo_movies = uow.repo(MovieRepository)
+            genre_no_identified = repo_genres.get_by_id_or_fail(config.GENRE_NOT_IDENTIFIED_ID)
+            genre = repo_genres.get_by_id_or_fail(id)
+            movies = repo_movies.get_by_genre_id(id)
+            for movie in movies:
+                movie.genre_id = genre_no_identified.id
+                if confirm: 
+                    repo_movies.update(movie)
+            if confirm: 
+                repo_genres.delete_by_id(id, confirm)
+                uow.commit()
+
+    def _map_genre_to_response(self, g) -> GenreResponse:
+        return GenreResponse(
+            id=g.id,
+            name=g.name
+        )
+    
