@@ -220,3 +220,7 @@ La aplicación:
  - define los servicios y casos de uso de negocio
 
 El framework nunca implementa lógica de negocio asociada al dominio User.
+
+# 11 Sesion Persistence
+ - Toda sesión autenticada persistente debe tener representación en base de datos.
+ - No se admiten JWT “stateless puros” para usuarios autenticados.
