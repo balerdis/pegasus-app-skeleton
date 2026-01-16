@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session, contains_eager
+# app/core/database/repositories/user_repository.py
+from sqlalchemy.orm import Session
 from pegasus_framework.db.repositories.base_repository import BaseRepository
 from app.core.database.models.users import User
 
