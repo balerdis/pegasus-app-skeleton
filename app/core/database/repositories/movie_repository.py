@@ -1,9 +1,11 @@
 # app/core/database/repositories/movie_repository.py
-from sqlalchemy.orm import Session, contains_eager
 from pegasus_framework.db.repositories.base_repository import BaseRepository
+
+from sqlalchemy import select, or_, func
+from sqlalchemy.orm import Session, contains_eager
+
 from app.core.database.models.movies import Movie
 from app.core.database.models.genres import Genre
-from sqlalchemy import select, or_, func
 
 
 

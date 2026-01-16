@@ -1,4 +1,6 @@
 # app/api/v1/endpoints/movies.py
+from fastapi import status, APIRouter, Depends
+
 from app.api.v1.schemas.movies import (
     MovieCreate,
     MovieUpdate,
@@ -6,16 +8,15 @@ from app.api.v1.schemas.movies import (
     DeleteMovieResponse,
     MoviesReportSummaryResponse
 )
-from app.core.services.dto.movie.report_summary_dto import MoviesReportSummaryDTO
 
-from pegasus_framework.api.v1.schemas.generic import ApiResponse
-from fastapi import status, APIRouter
-from pegasus_framework.db.connection import db_connection
-from app.core.services.movie_service import MovieService
 from app.core.services.dto.movie.search_dto import MovieSearchDTO
 from app.core.services.dto.movie.list_dto import MovieListDTO
 from app.core.services.dto.movie.report_filter_dto import ReportFilterDTO
-from fastapi import Depends
+from app.core.services.dto.movie.report_summary_dto import MoviesReportSummaryDTO
+
+from app.core.services.movie_service import MovieService
+
+from pegasus_framework.api.v1.schemas.generic import ApiResponse
 
 
 router = APIRouter()
