@@ -12,3 +12,4 @@ passlib[bcrypt]>=1.7.4
 pydantic[email]>=2.12.5
 pytz>=2025.2
 requests>=2.31.0
+jwt>=1.4.0
