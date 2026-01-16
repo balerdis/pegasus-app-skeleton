@@ -224,3 +224,119 @@ El framework nunca implementa lógica de negocio asociada al dominio User.
 # 11 Sesion Persistence
  - Toda sesión autenticada persistente debe tener representación en base de datos.
  - No se admiten JWT “stateless puros” para usuarios autenticados.
+
+# 12 ## Unit of Work & Transaction Management Policy
+
+### 12.1. Objetivo
+
+El sistema adopta el patrón **Unit of Work (UoW)** como límite transaccional explícito para todas las operaciones que modifican estado persistente.
+
+Los objetivos de esta política son:
+
+- Garantizar **consistencia transaccional**
+- Evitar **errores silenciosos** en operaciones de escritura
+- Separar de forma estricta **lógica de negocio** de **infraestructura**
+- Hacer explícitas las decisiones de `commit` y `rollback`
+- Proveer un modelo transaccional homogéneo entre aplicaciones
+
+---
+
+### 12.2. Propiedad y responsabilidad
+
+- La **UnitOfWork es provista exclusivamente por el framework** (`pegasus-framework`)
+- La aplicación **no define implementaciones concretas de UoW**
+- La aplicación **consume la UoW a través de los services**
+
+Esto garantiza:
+
+- Centralización de la política transaccional
+- Independencia de la aplicación respecto al ORM o backend de persistencia
+- Consistencia de comportamiento entre distintos proyectos basados en el framework
+
+---
+
+### 12.3. Política transaccional obligatoria
+
+El sistema adopta una política de **commit explícito y obligatorio**.
+
+Las reglas son las siguientes:
+
+1. Toda operación que abre una UnitOfWork **debe ejecutar `commit()` explícitamente** si la operación es exitosa.
+2. Si ocurre una excepción dentro del bloque `with`, la UnitOfWork:
+   - ejecuta `rollback()` automáticamente.
+3. **Salir de una UnitOfWork sin excepción y sin haber llamado a `commit()` es un error de programación.**
+
+Formalmente:
+
+> **Un bloque `with UnitOfWork()` que finaliza sin excepción y sin una llamada explícita a `commit()` representa un estado inválido del sistema.**
+
+Este estado **no debe resolverse de forma silenciosa** y debe manifestarse como un error explícito.
+
+---
+
+### 12.4. Ciclo de vida de la Unit of Work
+
+El ciclo de vida válido de una UnitOfWork es el siguiente:
+
+1. Entrada al contexto (`__enter__`)
+2. Ejecución de lógica de negocio
+3. Una y solo una de las siguientes opciones:
+   - `commit()` → confirma la transacción
+   - excepción → rollback automático
+4. Cierre y liberación de recursos (`__exit__`)
+
+Cualquier desviación de este flujo se considera un error de uso.
+
+---
+
+### 12.5. Rol de los Services
+
+- Los **services de la aplicación controlan explícitamente** el alcance transaccional.
+- Los services:
+  - deciden cuándo abrir una UnitOfWork
+  - deciden cuándo ejecutar `commit()`
+- Los services **no manejan directamente sesiones ni conexiones** de base de datos.
+
+Ejemplo conceptual:
+
+```python
+with self._uow() as uow:
+    repo = uow.repo(MovieRepository)
+    entity = repo.create(data)
+    uow.commit()
+```
+--- 
+
+### 12.6 Rol del framework
+
+El framework es responsable de:  
+
+ - Proveer la abstracción UnitOfWork
+ - Proveer implementaciones concretas (por ejemplo, SQLAlchemy)
+ - Imponer invariantes transaccionales
+ - Garantizar rollback automático ante excepciones
+ - Garantizar la liberación de recursos al finalizar la UoW
+El framework no ejecuta commits implícitos ni oculta el límite transaccional.
+
+---
+
+### 12.7 Prohibiciones explícitas
+
+Quedan explícitamente prohibidos los siguientes comportamientos:
+
+ - Commits implícitos al salir del bloque with
+ - Autocommit automático en ausencia de errores
+ - Uso directo de sesiones, conexiones o transacciones desde la aplicación
+ - Silenciar el caso “sin commit y sin excepción”
+ - Estas prohibiciones son parte del contrato arquitectónico del sistema.
+
+--- 
+### 12.8 Principio rector
+
+```text
+La transacción es una decisión de negocio expresada de forma explícita, nunca un efecto colateral de la infraestructura.
+```
+Este principio rige todas las decisiones relacionadas con persistencia y consistencia de datos dentro del sistema.
+
+
+---
