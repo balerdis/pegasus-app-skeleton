@@ -1,33 +1,35 @@
+# app/core/services/genre_service.py
+from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
+
 from app.config.config import config
-from pegasus_framework.business.base_service import BaseService
 from app.api.v1.schemas.genres.create import GenreCreate
 from app.api.v1.schemas.genres.responses import GenreResponse
-from pegasus_framework.db.unit_of_work.sqlalchemy_uow import SqlAlchemyUnitOfWork
 from app.core.database.repositories.genre_repository import GenreRepository
 from app.core.database.repositories.movie_repository import MovieRepository
 
-class GenreService(BaseService):
+
+class GenreService(SqlAlchemyService):
     def get_all(self) -> list[GenreResponse]:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(GenreRepository)
             genres = repo.get_all()
             return [self._map_genre_to_response(g) for g in genres]
     
     def create(self, data: GenreCreate) -> GenreResponse:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(GenreRepository)
             genre = repo.create(data.model_dump(), "name")  
             uow.commit()      
             return self._map_genre_to_response(genre)
         
     def get_by_id_or_fail(self, id: int) -> GenreResponse:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(GenreRepository)
             genre = repo.get_by_id_or_fail(id)
             return self._map_genre_to_response(genre)
     
     def update(self, id: int, data: GenreCreate) -> GenreResponse:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(GenreRepository)
             genre = repo.get_by_id_or_fail(id)
             update_data = data.model_dump(exclude_unset=True)
@@ -60,7 +62,7 @@ class GenreService(BaseService):
             _type_: No devuelve nada, no hace falta
         """
 
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo_genres = uow.repo(GenreRepository)
             repo_movies = uow.repo(MovieRepository)
             genre_no_identified = repo_genres.get_by_id_or_fail(config.GENRE_NOT_IDENTIFIED_ID)

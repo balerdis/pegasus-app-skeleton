@@ -1,18 +1,22 @@
-from app.api.v1.schemas.movies import MovieCreate, MovieUpdate, MovieResponse
+# app/core/services/movie_service.py
+
+from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
+
 from app.api.v1.schemas.genres.responses import GenreResponse
-from pegasus_framework.business.base_service import BaseService
+from app.api.v1.schemas.movies import MovieCreate, MovieUpdate, MovieResponse
+
 from app.core.services.dto.movie.search_dto import MovieSearchDTO
 from app.core.services.dto.movie.report_filter_dto import ReportFilterDTO
 from app.core.services.dto.movie.list_dto import MovieListDTO
 from app.core.services.dto.movie.report_summary_dto import MoviesReportSummaryDTO
-from pegasus_framework.db.unit_of_work.sqlalchemy_uow import SqlAlchemyUnitOfWork
+
 from app.core.database.repositories.movie_repository import MovieRepository
 
 
-class MovieService(BaseService):
+class MovieService(SqlAlchemyService):
 
     def create(self, data: MovieCreate) -> MovieResponse:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             movie = repo.create(data.model_dump())
             uow.commit()     
@@ -22,7 +26,7 @@ class MovieService(BaseService):
     def search(self, 
                params: MovieSearchDTO
                ) -> list[MovieResponse]:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             movies = repo.search(
                 search=params.search,
@@ -38,7 +42,7 @@ class MovieService(BaseService):
     def get_all(self, 
                 params: MovieListDTO
                 ) -> list[MovieResponse]:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             movies = repo.get_all_ordered(
                 title_order_asc=params.title_order_asc,
@@ -53,7 +57,7 @@ class MovieService(BaseService):
         self
         , filters: ReportFilterDTO
     ) -> MoviesReportSummaryDTO:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             reporte = repo.get_reporte_resumen(
                 filters.genre, 
@@ -71,20 +75,20 @@ class MovieService(BaseService):
         self
         , n: int = 5
     ) -> list[MovieResponse]:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             movies = repo.get_top_by_price(n)
             return [self._map_movie_to_response(m) for m in movies]
     
     def get_by_id_or_fail(self, id: int) -> MovieResponse:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             m = repo.get_by_id_or_fail(id)
 
             return self._map_movie_to_response(m)
     
     def update(self, id: int, data: MovieUpdate) -> MovieResponse:
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             movie = repo.get_by_id_or_fail(id)
 
@@ -105,7 +109,7 @@ class MovieService(BaseService):
         if not confirm:
             return
 
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(MovieRepository)
             movie = repo.get_by_id_or_fail(id)
             repo.delete(movie)

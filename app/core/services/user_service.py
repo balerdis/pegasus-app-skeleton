@@ -1,14 +1,15 @@
-from app.core.services.base_service import BaseService
+# app/core/services/user_service.py
+from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
 from pegasus_framework.core.security.hash_password import hash_password
-from pegasus_framework.db.unit_of_work.sqlalchemy_uow import SqlAlchemyUnitOfWork
+
 from app.api.v1.schemas.users.responses import UserResponse
 from app.core.database.repositories.user_repository import UserRepository
 
 
-class UserService(BaseService):
+class UserService(SqlAlchemyService):
 
     def create_user(self, data):
-        with SqlAlchemyUnitOfWork() as uow:
+        with self._uow() as uow:
             repo = uow.repo(UserRepository)
             data.password = hash_password(data.password)
             user.password = None
