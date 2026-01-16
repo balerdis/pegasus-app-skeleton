@@ -1,0 +1,127 @@
+# app/core/services/auth/auth_service.py
+
+from datetime import datetime, timedelta, timezone
+
+from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
+from pegasus_framework.auth.security.tokens.jwt_token_service import JwtTokenService
+from pegasus_framework.auth.security.hash_password import PasswordHasher
+
+from pegasus_framework.core.exceptions.domain import InvalidCredentialsError
+
+from app.core.database.repositories.user_repository import UserRepository
+from app.core.services.auth.auth_session_service import AuthSessionService
+
+class AuthService(SqlAlchemyService):
+    """
+    Servicio de aplicación para autenticación.
+
+    - Orquesta JWT + sesiones persistentes
+    - Usa Unit of Work
+    - No conoce HTTP ni FastAPI
+    """
+
+    def __init__(
+        self,
+        *,
+        token_service: JwtTokenService,
+        password_hasher: PasswordHasher,
+        access_token_ttl: timedelta,
+    ):
+        super().__init__()
+        self._token_service = token_service
+        self._password_hasher = password_hasher
+        self._access_token_ttl = access_token_ttl
+
+    def login(
+        self,
+        *,
+        identifier: str,
+        password: str,
+        now: datetime | None = None,
+    ) -> dict:
+        """
+        Autentica un usuario y retorna un access token JWT.
+        """
+        if now is None:
+            now = datetime.now(timezone.utc)
+
+        with self._uow() as uow:
+            users_repo = uow.repo(UserRepository)
+
+            user = users_repo.get_by_email(identifier)
+
+            hashed_password = (
+                user.password
+                if user
+                else self._password_hasher.hash("dummy-password")
+            )            
+
+            if not self._password_hasher.verify(password, hashed_password):
+                raise InvalidCredentialsError()
+
+            token_data = self._token_service.generate_token(
+                subject=str(user.id),
+                expires_delta=self._access_token_ttl,
+                now=now,
+            )
+
+            # Persistimos la sesión
+            AuthSessionService(uow).create_session(
+                user_id=user.id,
+                token_id=token_data["token_id"],
+                expires_at=token_data["expires_at"],
+            )
+
+            # Importante: siempre el service debe commitear su UoW
+            uow.commit()
+
+            return {
+                "access_token": token_data["access_token"],
+                "token_type": "bearer",
+                "expires_at": token_data["expires_at"],
+            }
+
+    def logout(
+        self,
+        *,
+        token: str,
+    ) -> None:
+        """
+        Revoca la sesión asociada al token JWT.
+        """
+        decoded = self._token_service.decode_and_validate(token=token)
+        token_id = self._token_service.extract_token_id(
+            decoded_payload=decoded
+        )
+
+        AuthSessionService(self._uow).revoke_session(
+            token_id=token_id
+        )
+
+    def validate_access_token(
+        self,
+        *,
+        token: str,
+        now: datetime | None = None,
+    ) -> int:
+        """
+        Valida un access token y retorna el user_id.
+        """
+        if now is None:
+            now = datetime.now(timezone.utc)
+
+        decoded = self._token_service.decode_and_validate(token=token)
+        token_id = self._token_service.extract_token_id(
+            decoded_payload=decoded
+        )
+
+        session = AuthSessionService(self._uow).get_valid_session(
+            token_id=token_id,
+            now=now,
+        )
+
+        if session is None:
+            raise ValueError("Session revoked or expired")
+
+        # El subject del JWT define la identidad
+        return int(decoded["sub"])

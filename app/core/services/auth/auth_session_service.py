@@ -1,3 +1,4 @@
+# app/core/services/auth/auth_session_service.py
 from datetime import datetime
 
 from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
@@ -17,27 +18,23 @@ class AuthSessionService(SqlAlchemyService):
     - Orquesta reglas sobre sesiones persistentes
     """
 
+class AuthSessionService:
+    def __init__(self, uow):
+        self._uow = uow
+
     def create_session(
         self,
         *,
         user_id: int,
         token_id: str,
-        expires_at: datetime,
+        expires_at,
     ):
-        """
-        Crea una nueva sesión para un usuario.
-        """
-        with self._uow() as uow:
-            repo = uow.repo(SqlAlchemySessionRepository)
-
-            session = repo.create(
-                user_id=user_id,
-                token_id=token_id,
-                expires_at=expires_at,
-            )
-
-            uow.commit()
-            return session
+        repo = self._uow.repo(SqlAlchemySessionRepository)
+        return repo.create(
+            user_id=user_id,
+            token_id=token_id,
+            expires_at=expires_at,
+        )
 
     def get_valid_session(
         self,
