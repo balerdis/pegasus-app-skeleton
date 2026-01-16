@@ -1,4 +1,5 @@
-from fastapi import status, APIRouter, Depends
+# app/api/v1/endpoints/genres.py
+from fastapi import status, APIRouter
 from pegasus_framework.api.v1.schemas.generic import ApiResponse
 from app.api.v1.schemas.genres.responses import GenreResponse, DeleteGenreResponse
 from app.api.v1.schemas.genres.create import GenreCreate

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from app.core.services.dto.user.user_create_dto import UserCreateDTO
 from app.core.services.user_service import UserService
