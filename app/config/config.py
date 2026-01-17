@@ -12,6 +12,10 @@ class Config(BaseSettings):
     ENVIRONMENT: str = "develop"
 
     GENRE_NOT_IDENTIFIED_ID : int = 11
+    
+    JWT_SECRET_KEY: str = "secret"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_TTL_MINUTES: int = 30
 
     DEBUG: bool = False
 
