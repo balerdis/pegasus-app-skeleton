@@ -49,7 +49,8 @@ class AuthService(SqlAlchemyService):
             users_repo = uow.repo(UserRepository)
 
             user = users_repo.get_by_email(identifier)
-
+            
+            # seguridad para evitar ataque de fuerza bruta
             hashed_password = (
                 user.password
                 if user
