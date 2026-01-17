@@ -3,14 +3,14 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from pegasus_framework.api.middleware.auth_middleware import AuthMiddleware
 from pegasus_framework.db.connection import db_connection
 from app.api.v1.endpoints.movies import router as api_router_movies
 from app.api.v1.endpoints.genres import router as api_router_genres
-from app.api.v1.endpoints.users import router as api_router_users
+from app.api.v1.endpoints.users import protected_router as api_router_users
 from pegasus_framework.api.system.router import router as system_router
-from pegasus_framework.api.exceptions.register import register_exception_handlers
+from pegasus_framework.api.exceptions.registry_all import register_all_exception_handlers
 from app.wiring.bootstrap import bootstrap_application
+from pegasus_framework.api.middleware.auth_middleware import AuthContextMiddleware
 
 from pegasus_framework.core.config.config import config
 
@@ -51,7 +51,7 @@ def create_app() -> FastAPI:
         redoc_url="/redoc"
     )
 
-    register_exception_handlers(app)    
+    register_all_exception_handlers(app)    
     def custom_openapi():
         if app.openapi_schema:
             return app.openapi_schema
@@ -68,31 +68,19 @@ def create_app() -> FastAPI:
     
     app.openapi = custom_openapi
 
-    excluded_paths = [
-        "/docs",
-        "/redoc",
-        "/openapi.json",
-        "/health",
-        "/favicon.ico",
-    ]      
-
-    protected_paths = []
-
-    app.add_middleware(
-        AuthMiddleware,
-        excluded_paths=excluded_paths,
-        protected_paths=protected_paths  
-    )
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:4200"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],    
-    )    
+    ) 
 
-    logger.info("Auth Middleware configurated")
+    app.add_middleware(
+        AuthContextMiddleware
+    )   
+
+    logger.info("CORS Middleware configurated")
 
     v1_router = APIRouter()
     v1_router.include_router(api_router_movies, tags=["MOVIES"], prefix="/movies")
