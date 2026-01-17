@@ -340,3 +340,17 @@ Este principio rige todas las decisiones relacionadas con persistencia y consist
 
 
 ---
+
+# 13. Error Management Policy
+
+## 13.1. Visión general
+La semántica del error vive en la excepción.
+La forma HTTP del error vive en el handler.
+El contrato HTTP es único y consistente.
+
+## 13.2. Principio rector
+```text
+Los errores son un aspecto de negocio, no de infraestructura.
+```
+El principio rige todas las decisiones relacionadas con el manejo de errores dentro del sistema.
+
