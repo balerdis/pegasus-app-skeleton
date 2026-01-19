@@ -354,3 +354,12 @@ Los errores son un aspecto de negocio, no de infraestructura.
 ```
 El principio rige todas las decisiones relacionadas con el manejo de errores dentro del sistema.
 
+# 14. Anti-patrones prohibidos
+
+- Framework con migraciones
+- Framework con `__tablename__`
+
+# 15. JWT Implementation
+
+Pegasus Framework utiliza PyJWT como librería de referencia para JWT.
+El paquete `jwt` (pip) no es compatible y no debe utilizarse.
