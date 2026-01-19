@@ -20,17 +20,29 @@ def get_bearer_token(
         )
     return credentials.credentials
 
-def get_auth_service() -> AuthService:
+def get_jwt_token_service() -> JwtTokenService:
+    return JwtTokenService(
+        secret_key=settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+
+def get_password_hasher() -> PasswordHasher:
+    return PasswordHasher()
+
+def get_auth_service(
+    token_service: JwtTokenService = Depends(get_jwt_token_service),
+    password_hasher: PasswordHasher = Depends(get_password_hasher),
+) -> AuthService:
     return AuthService(
-        token_service=JwtTokenService(
-            secret_key=settings.JWT_SECRET_KEY,
-            algorithm=settings.JWT_ALGORITHM,
-        ),
-        password_hasher=PasswordHasher(),
+        token_service=token_service,
+        password_hasher=password_hasher,
         access_token_ttl=timedelta(
             minutes=settings.JWT_ACCESS_TOKEN_TTL_MINUTES
         ),
     )
+
+
+
 
 
 
