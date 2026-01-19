@@ -6,12 +6,13 @@ from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
 from pegasus_framework.auth.security.tokens.jwt_token_service import JwtTokenService
 from pegasus_framework.auth.security.hash_password import PasswordHasher
 
-from pegasus_framework.core.exceptions.domain import InvalidCredentialsError
+from pegasus_framework.core.exceptions.domain import InvalidCredentialsError, InvalidAuthSessionError
+
 
 from app.core.database.repositories.user_repository import UserRepository
 from app.core.services.auth.auth_session_service import AuthSessionService
 
-class AuthService(SqlAlchemyService):
+class  AuthService(SqlAlchemyService):
     """
     Servicio de aplicación para autenticación.
 
@@ -95,18 +96,19 @@ class AuthService(SqlAlchemyService):
             decoded_payload=decoded
         )
 
-        AuthSessionService(self._uow).revoke_session(
-            token_id=token_id
-        )
+        with self._uow() as uow:
+            AuthSessionService(uow).revoke_session(
+                token_id=token_id
+            )
+            uow.commit()
 
-    def validate_access_token(
-        self,
-        *,
-        token: str,
-        now: datetime | None = None,
-    ) -> int:
+    def authenticate(self, *, token: str, now: datetime | None = None) -> int:
         """
-        Valida un access token y retorna el user_id.
+        Autentica una identidad a partir de un access token.
+
+        - Valida JWT
+        - Valida sesión
+        - Retorna user_id
         """
         if now is None:
             now = datetime.now(timezone.utc)
@@ -122,7 +124,7 @@ class AuthService(SqlAlchemyService):
         )
 
         if session is None:
-            raise ValueError("Session revoked or expired")
+            raise InvalidAuthSessionError()
 
         # El subject del JWT define la identidad
         return int(decoded["sub"])

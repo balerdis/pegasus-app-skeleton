@@ -42,44 +42,25 @@ class AuthSessionService:
         token_id: str,
         now: datetime,
     ):
-        """
-        Retorna la sesión válida asociada al token_id o None.
-        """
-        with self._uow() as uow:
-            repo = uow.repo(SqlAlchemySessionRepository)
+        repo = self._uow.repo(SqlAlchemySessionRepository)
+        return repo.get_valid_by_token_id(
+            token_id=token_id,
+            now=now,
+        )
 
-            return repo.get_valid_by_token_id(
-                token_id=token_id,
-                now=now,
-            )
 
     def revoke_session(
         self,
         *,
         token_id: str,
     ) -> None:
-        """
-        Revoca una sesión específica por token_id.
-        """
-        with self._uow() as uow:
-            repo = uow.repo(SqlAlchemySessionRepository)
-
-            repo.revoke(token_id=token_id)
-
-            uow.commit()
+        repo = self._uow.repo(SqlAlchemySessionRepository)
+        repo.revoke(token_id=token_id)
 
     def revoke_all_sessions_for_user(
         self,
         *,
         user_id: int,
     ) -> int:
-        """
-        Revoca todas las sesiones activas de un usuario.
-        """
-        with self._uow() as uow:
-            repo = uow.repo(SqlAlchemySessionRepository)
-
-            count = repo.revoke_all_for_user(user_id=user_id)
-
-            uow.commit()
-            return count
+        repo = self._uow.repo(SqlAlchemySessionRepository)
+        return repo.revoke_all_for_user(user_id=user_id)
