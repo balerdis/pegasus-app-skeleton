@@ -10,7 +10,7 @@ from app.api.v1.endpoints.users import protected_router as api_router_users
 from pegasus_framework.api.system.router import router as system_router
 from pegasus_framework.api.exceptions.registry_all import register_all_exception_handlers
 from app.wiring.bootstrap import bootstrap_application
-from pegasus_framework.api.middleware.auth_middleware import AuthContextMiddleware
+from pegasus_framework.api.middleware.rate_limit import RateLimitMiddleware, InMemoryRateLimiter
 
 from pegasus_framework.core.config.config import config
 
@@ -77,8 +77,9 @@ def create_app() -> FastAPI:
     ) 
 
     app.add_middleware(
-        AuthContextMiddleware
-    )   
+        RateLimitMiddleware,
+        limiter=InMemoryRateLimiter(),
+    )
 
     logger.info("CORS Middleware configurated")
 
