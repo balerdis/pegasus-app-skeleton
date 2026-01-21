@@ -366,3 +366,84 @@ El principio rige todas las decisiones relacionadas con el manejo de errores den
 
 Pegasus Framework utiliza PyJWT como librería de referencia para JWT.
 El paquete `jwt` (pip) no es compatible y no debe utilizarse.
+
+# 16. Protección de Endpoints y Autenticación
+
+## 16.1 Principio fundamental
+
+Autenticación, identidad y autorización son responsabilidades distintas y no deben confundirse.
+
+Un endpoint debe exigir **únicamente el nivel de protección que realmente necesita**.
+
+## 16.2 Niveles de protección
+
+El sistema reconoce tres niveles explícitos de protección de endpoints:
+
+### Nivel A — Autenticación técnica
+
+Garantiza que el request:
+- contiene credenciales
+- presenta un token válido
+- el token no está expirado ni es inválido
+
+Características:
+- No carga entidades de dominio
+- No accede a base de datos
+- No construye `User`
+
+Ejemplos de uso:
+- `/auth/logout`
+- `/auth/refresh`
+- Endpoints que sólo requieren que el request no sea anónimo
+
+---
+
+### Nivel B — Contexto de identidad
+
+Además de la autenticación técnica:
+- identifica al usuario
+- carga el agregado `User`
+- establece contexto de dominio
+
+Características:
+- Accede a base de datos
+- Construye entidades de dominio
+- Tiene costo computacional mayor
+
+Ejemplos de uso:
+- `/users/me`
+- Casos de uso que dependen del usuario autenticado
+
+---
+
+### Nivel C — Autorización de negocio
+
+Evalúa reglas del dominio sobre el usuario autenticado:
+- roles
+- ownership
+- permisos
+
+Este nivel **siempre requiere** Nivel B.
+
+---
+
+## 16.3 Regla arquitectónica obligatoria
+
+> **Un endpoint no debe depender de `get_current_user` si no necesita el agregado `User`.**
+
+La autenticación técnica y la carga de identidad deben mantenerse separadas.
+
+Sobrecargar un endpoint con identidad cuando no es requerida se considera un error de diseño.
+
+---
+
+## 16.4 Dependencias recomendadas
+
+- Autenticación técnica:
+  - `get_bearer_token`
+  - `require_authentication`
+
+- Identidad:
+  - `get_current_user`
+
+Cada endpoint debe declarar explícitamente cuál necesita.
