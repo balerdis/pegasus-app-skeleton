@@ -68,6 +68,8 @@ Responsabilidades:
 Reglas:
 - Una UoW por caso de uso
 - Nadie ejecuta `commit()` fuera de la UoW
+- El UnitOfWork no impone políticas de commit (El UnitOfWork garantiza el boundary transaccional).
+- La responsabilidad de cerrar una transacción pertenece al Application Service (El Application Service decide cuándo persistir).
 
 ---
 
@@ -306,6 +308,7 @@ with self._uow() as uow:
     uow.commit()
 ```
 --- 
+
 
 ### 12.6 Rol del framework
 
