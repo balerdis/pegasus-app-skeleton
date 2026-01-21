@@ -7,6 +7,7 @@ from pegasus_framework.db.connection import db_connection
 from app.api.v1.endpoints.movies import router as api_router_movies
 from app.api.v1.endpoints.genres import router as api_router_genres
 from app.api.v1.endpoints.users import protected_router as api_router_users
+from app.api.v1.endpoints.auth import router as api_router_auth
 from pegasus_framework.api.system.router import router as system_router
 from pegasus_framework.api.exceptions.registry_all import register_all_exception_handlers
 from app.wiring.bootstrap import bootstrap_application
@@ -86,6 +87,7 @@ def create_app() -> FastAPI:
     v1_router = APIRouter()
     v1_router.include_router(api_router_movies, tags=["MOVIES"], prefix="/movies")
     v1_router.include_router(api_router_genres, tags=["GENRES"], prefix="/genres")
+    v1_router.include_router(api_router_auth, tags=["AUTH"], prefix="/auth")
     v1_router.include_router(api_router_users, tags=["USERS"], prefix="/users")
     logger.info("V1 Routers configurated")
 

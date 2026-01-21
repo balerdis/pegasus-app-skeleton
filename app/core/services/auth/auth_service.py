@@ -11,6 +11,7 @@ from pegasus_framework.core.exceptions.domain import InvalidCredentialsError, In
 
 from app.core.database.repositories.user_repository import UserRepository
 from app.core.services.auth.auth_session_service import AuthSessionService
+from app.api.v1.schemas.auth.responses import LoginResult
 
 class  AuthService(SqlAlchemyService):
     """
@@ -76,12 +77,12 @@ class  AuthService(SqlAlchemyService):
 
             # Importante: siempre el service debe commitear su UoW
             uow.commit()
+            return LoginResult(
+                access_token=token_data["access_token"],
+                token_type="bearer",
+                expires_at=token_data["expires_at"],
+            )
 
-            return {
-                "access_token": token_data["access_token"],
-                "token_type": "bearer",
-                "expires_at": token_data["expires_at"],
-            }
 
     def logout(
         self,
@@ -118,10 +119,11 @@ class  AuthService(SqlAlchemyService):
             decoded_payload=decoded
         )
 
-        session = AuthSessionService(self._uow).get_valid_session(
-            token_id=token_id,
-            now=now,
-        )
+        with self._uow() as uow:
+            session = AuthSessionService(uow).get_valid_session(
+                token_id=token_id,
+                now=now,
+            )
 
         if session is None:
             raise InvalidAuthSessionError()
