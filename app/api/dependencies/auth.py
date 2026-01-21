@@ -6,7 +6,7 @@ from pegasus_framework.auth.security.tokens.jwt_token_service import JwtTokenSer
 from pegasus_framework.auth.security.hash_password import PasswordHasher
 from app.config.config import config as settings   
 from app.core.services.auth.auth_service import AuthService
-from app.api.v1.schemas import status
+
 
 security = HTTPBearer(auto_error=False)
 
@@ -24,6 +24,9 @@ def get_jwt_token_service() -> JwtTokenService:
     return JwtTokenService(
         secret_key=settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM,
+        access_token_ttl=timedelta(
+            minutes=settings.JWT_ACCESS_TOKEN_TTL_MINUTES
+        ),        
     )
 
 def get_password_hasher() -> PasswordHasher:
@@ -36,10 +39,14 @@ def get_auth_service(
     return AuthService(
         token_service=token_service,
         password_hasher=password_hasher,
-        access_token_ttl=timedelta(
-            minutes=settings.JWT_ACCESS_TOKEN_TTL_MINUTES
-        ),
     )
+
+def require_authentication(
+    token: str = Depends(get_bearer_token),
+    token_service: JwtTokenService = Depends(get_jwt_token_service),
+):
+    payload = token_service.decode_and_validate(token=token)
+    return payload
 
 
 

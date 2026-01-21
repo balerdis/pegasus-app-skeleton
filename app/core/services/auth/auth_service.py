@@ -27,12 +27,10 @@ class  AuthService(SqlAlchemyService):
         *,
         token_service: JwtTokenService,
         password_hasher: PasswordHasher,
-        access_token_ttl: timedelta,
     ):
         super().__init__()
         self._token_service = token_service
         self._password_hasher = password_hasher
-        self._access_token_ttl = access_token_ttl
 
     def login(
         self,
@@ -62,10 +60,8 @@ class  AuthService(SqlAlchemyService):
             if not self._password_hasher.verify(password, hashed_password):
                 raise InvalidCredentialsError()
 
-            token_data = self._token_service.generate_token(
-                subject=str(user.id),
-                expires_delta=self._access_token_ttl,
-                now=now,
+            token_data = self._token_service.generate_access_token(
+                subject=str(user.id)
             )
 
             # Persistimos la sesión
