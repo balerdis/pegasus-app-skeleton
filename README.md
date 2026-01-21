@@ -24,7 +24,7 @@ Este repositorio **no es una aplicación de negocio**, sino una **plantilla estr
 
 ### No es
 
-- Un proyecto de negocio terminado
+- Un proyecto de negocio terminado (a modo de ejemplo se muestra 2 ABMS de entidades relacionadas y sistema de authenticacion JWT)
 - Un monorepo de features
 - Un framework alternativo
 - Un lugar para lógica reusable transversal
