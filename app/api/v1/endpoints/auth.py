@@ -25,12 +25,13 @@ def login(
     """
 
     result = auth_service.login(
-        email=payload.email,
+        identifier=payload.email,
         password=payload.password,
     )
 
     return LoginResponse(
         access_token=result.access_token,
+        token_type=result.token_type,
         expires_at=result.expires_at,
     )
 

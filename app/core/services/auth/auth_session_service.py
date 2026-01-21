@@ -7,8 +7,7 @@ from app.core.database.repositories.session_repository import (
     SqlAlchemySessionRepository,
 )
 
-
-class AuthSessionService(SqlAlchemyService):
+class AuthSessionService:
     """
     Servicio de dominio técnico para la gestión de sesiones de autenticación.
 
@@ -16,9 +15,7 @@ class AuthSessionService(SqlAlchemyService):
     - No conoce HTTP
     - No conoce JWT
     - Orquesta reglas sobre sesiones persistentes
-    """
-
-class AuthSessionService:
+    """    
     def __init__(self, uow):
         self._uow = uow
 
