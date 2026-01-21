@@ -9,7 +9,7 @@ from app.api.dependencies.auth import get_auth_service, get_bearer_token
 
 
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter()
 
 @router.post(
     "/login",
