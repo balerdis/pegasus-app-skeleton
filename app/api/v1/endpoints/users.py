@@ -5,12 +5,13 @@ from app.core.services.user_service import UserService
 from pegasus_framework.api.v1.schemas.generic import ApiResponse
 from app.api.v1.schemas.users.responses import UserResponse
 from app.core.services.user_service import UserService
+from app.api.dependencies.auth import require_authentication
 from app.api.dependencies.current_user import get_current_user
 from app.core.database.models.users import User
 
 
 protected_router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(require_authentication)]
 )
 
 
