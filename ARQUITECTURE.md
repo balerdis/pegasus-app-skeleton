@@ -48,8 +48,8 @@ Regla clave:
 
 Pueden existir en dos lugares:
 
-- **Framework** → negocio reusable
 - **Aplicación** → negocio específico
+- **Framework** → negocio reusable
 
 Características:
 - No conocen HTTP
