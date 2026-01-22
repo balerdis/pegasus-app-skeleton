@@ -76,22 +76,37 @@ Database
 ## Estructura del proyecto
 
 ```text
-app/
-├── api/
-│   └── v1/
-│       ├── endpoints/
-│       └── schemas/
-├── core/
-│   ├── database/
-│   │   ├── base.py
-│   │   └── models/
-│   ├── services/        # negocio propio de la app
-│   └── unit_of_work/
-├── wiring/
-│   └── bootstrap.py
-├── overrides/
-├── main.py
-└── settings.py
+Documentacion de la pegasus-app-skeleton organización de directorios y objetivo de cada uno:
+
+pegasus-app-skeleton
+├── app
+│   ├── api
+│   │   ├── dependencies       # Directorio donde van los providers que Intermedia service del framework a la capa API
+│   │   ├── main.py            # file central de construccion de la app FastAPI
+│   │   └── v1                 # Directorio para versionado de endpoints
+│   │       ├── endpoints      # directorio endpoints
+│   │       └── schemas                  # Directorio para DTOs entre la capa API HTTP y la capa DOMAIN SERVICE
+│   ├── cli                              # Futura interfaz de cli de la app
+│   ├── config                           # Directorio de Config centralizada de la app
+│   ├── core                             # Directorio para logica central independiente de la interfaz hacia afuera
+│   │   ├── database                     # Directorio para logica de base de datos
+│   │   │   ├── alembic                  # Directorio para ORM Alembic
+│   │   │   ├── alembic.ini              # File Alembic decide que modelos tomar en cuenta 
+│   │   │   ├── models                   # Directorio para modelos que representan la base de datos
+│   │   │   └── repositories             # Directorio para el patron repository de los modelos a la base de datos
+│   │   └── services                     # Directorio para el patron domain service con sus DTOs que va de capa resultset a capa service
+│   ├── data                             # Directorio futuro almacenaje de archivos adjuntos
+│   ├── overrides                          # Directorio para hacer override de logica proveniente desde el Pegasus-framework
+│   ├── scripts                            # Directorio para script varios y de prueba
+│   └── wiring                             # Directorio para vinculo de logica residente en el framework y se quiere utilizar en la app
+│       └── bootstrap.py                   # File central de disponibilizacion de codigo residente en el framework y permitir usarlo desde la app
+├── ARQUITECTURE.md           # File de documentación de la arquitectura de la aplicacion
+├── pyproject.toml            # File para package de la app e indicar su dependencia del framework
+├── README.md                 # File de documentacion general de la aplicacion
+├── requirements.in           # File de dependencias para utilizar con pip-compile de pip-tools
+├── requirements.in.example   # File de dependencias que se puede subir al repositorio
+└── requirements.txt          # File resultante de pip-compile que podemos utilizar para pip-sync e instalar rapidamente las dependencias de la app
+
 ```
 
 ---
