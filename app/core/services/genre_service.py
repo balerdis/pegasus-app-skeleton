@@ -18,7 +18,7 @@ class GenreService(SqlAlchemyService):
     def create(self, data: GenreCreate) -> GenreResponse:
         with self._uow() as uow:
             repo = uow.repo(GenreRepository)
-            genre = repo.create(data.model_dump(), "name")  
+            genre = repo.create(data.model_dump())  
             uow.commit()      
             return self._map_genre_to_response(genre)
         
