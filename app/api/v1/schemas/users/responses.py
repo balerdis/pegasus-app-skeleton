@@ -7,3 +7,6 @@ class UserResponse(BaseModel):
     email: str
     name: str
     habilited: bool
+
+class DeleteUserResponse(BaseModel):
+    id: int
