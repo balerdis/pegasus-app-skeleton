@@ -1,8 +1,8 @@
 """seed admin user
 
-Revision ID: a22a5ce7f98e
-Revises: af428630c892
-Create Date: 2026-01-21 12:15:08.997640
+Revision ID: 659204a9c884
+Revises: 66f97015ad68
+Create Date: 2026-01-23 19:32:58.969167
 
 """
 from typing import Sequence, Union
@@ -17,8 +17,8 @@ pwd_context = CryptContext(
 )
 
 # revision identifiers, used by Alembic.
-revision: str = 'a22a5ce7f98e'
-down_revision: Union[str, Sequence[str], None] = 'af428630c892'
+revision: str = '659204a9c884'
+down_revision: Union[str, Sequence[str], None] = '66f97015ad68'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -73,4 +73,3 @@ def downgrade() -> None:
         ),
         {"email": "admin@admin.com.ar"},
     )
-
