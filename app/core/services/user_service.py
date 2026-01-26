@@ -1,6 +1,7 @@
+# app/core/services/user_service.py
 from sqlalchemy.exc import IntegrityError
 from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
-from app.core.database.repositories.user_repository import UserRepository
+from pegasus_framework.db.repositories.user_repository import UserRepository
 from app.core.database.models.users import User
 from pegasus_framework.auth.security.hash_password import PasswordHasher
 from app.api.v1.schemas.users.responses import UserResponse
