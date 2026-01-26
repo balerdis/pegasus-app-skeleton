@@ -1,9 +1,8 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 
 from app.api.dependencies.auth import get_bearer_token, get_auth_service
 from app.api.dependencies.users import get_user_service
-from app.core.services import auth
-from app.core.services.auth.auth_service import AuthService
+from pegasus_framework.auth.services.auth_service import AuthService
 from app.core.services.user_service import UserService
 from app.core.database.models.users import User
 
