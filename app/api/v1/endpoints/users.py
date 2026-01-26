@@ -96,7 +96,7 @@ def update_by_id(
     )
 
 # ####################DELETE USER###################
-@protected_router.delete("/{genre_id}", 
+@protected_router.delete("/{id}", 
             response_model=ApiResponse[DeleteUserResponse],
             description="Elimina un genero",
             status_code=status.HTTP_200_OK
