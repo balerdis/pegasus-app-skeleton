@@ -7,9 +7,11 @@ class LoginRequest(BaseModel):
     password: str = Field(..., min_length=8, description="Password en texto plano")
 
     class Config:
-        schema_extra = {
-            "example": {
-                "email": "8tHsL@example.com",
-                "password": "password123",
+        model_config = {
+            "json_schema_extra": {
+                "example": {
+                    "email": "8tHsL@example.com",
+                    "password": "password123",
+                }
             }
         }
