@@ -5,7 +5,7 @@ from datetime import timedelta
 from pegasus_framework.auth.security.tokens.jwt_token_service import JwtTokenService
 from pegasus_framework.auth.security.hash_password import PasswordHasher
 from app.config.config import config as settings   
-from app.core.services.auth.auth_service import AuthService
+from pegasus_framework.auth.services.auth_service import AuthService
 
 
 security = HTTPBearer(auto_error=False)

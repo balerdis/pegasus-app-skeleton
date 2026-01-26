@@ -1,10 +1,10 @@
 # app/api/v1/auth/login.py
 from fastapi import APIRouter, Depends, status
+from pegasus_framework.auth.services.auth_service import AuthService
 
 from app.api.v1.schemas.auth.login import LoginRequest
 from app.api.v1.schemas.auth.responses import LoginResponse
 
-from app.core.services.auth.auth_service import AuthService
 from app.api.dependencies.auth import get_auth_service, get_bearer_token
 
 
