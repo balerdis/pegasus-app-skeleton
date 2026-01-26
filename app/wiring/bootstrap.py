@@ -3,6 +3,8 @@
 from fastapi import FastAPI
 from app.wiring.models.users import register_user_model
 from app.core.database.models.users import User
+from pegasus_framework.db.unit_of_work.sqlalchemy_uow import SqlAlchemyUnitOfWork
+from app.wiring.repositories.session_repository import REPOSITORY_BINDINGS
 
 def bootstrap_application(app: FastAPI) -> None:
     """
@@ -14,3 +16,10 @@ def bootstrap_application(app: FastAPI) -> None:
     # 2. Registrar overrides de servicios
 
     # 3. Registrar middlewares
+
+    # 4. Registrar repositories
+    for abstraction, implementation in REPOSITORY_BINDINGS.items():
+        SqlAlchemyUnitOfWork.bind_repository(
+            abstraction,
+            implementation,
+        )    
