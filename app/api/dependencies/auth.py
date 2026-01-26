@@ -48,6 +48,12 @@ def require_authentication(
     payload = token_service.decode_and_validate(token=token)
     return payload
 
+def require_authenticated_identity(
+    token: str = Depends(get_bearer_token),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> int:
+    return auth_service.authenticate(token=token)
+
 
 
 

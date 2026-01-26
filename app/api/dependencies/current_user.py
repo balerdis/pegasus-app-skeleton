@@ -1,3 +1,4 @@
+# pegasus_framework/api/dependencies/current_user.py
 from fastapi import Depends
 
 from app.api.dependencies.auth import get_bearer_token, get_auth_service
