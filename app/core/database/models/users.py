@@ -3,8 +3,8 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database.models.base import Base
-from pegasus_framework.auth.models.users.user_base import BaseUser
-from pegasus_framework.auth.models.users.mixins import AuditableUserMixin
+from pegasus_framework.db.models.users.user_base import BaseUser
+from pegasus_framework.db.models.users.mixins import AuditableUserMixin
 from pegasus_framework.db.models.mixins import AuditMixin
 from sqlalchemy.orm import relationship
 
