@@ -51,8 +51,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('token_hash', name=op.f('uq_auth_session_tokens_token_hash'))
     )
     op.create_index(op.f('ix_auth_session_tokens_auth_session_id'), 'auth_session_tokens', ['auth_session_id'], unique=False)
-    op.drop_index(op.f('ix_user_sessions_token_id'), table_name='user_sessions')
-    op.drop_index(op.f('ix_user_sessions_user_id'), table_name='user_sessions')
     op.drop_table('user_sessions')
     # ### end Alembic commands ###
 
@@ -74,7 +72,6 @@ def downgrade() -> None:
     )
     op.create_index(op.f('ix_user_sessions_user_id'), 'user_sessions', ['user_id'], unique=False)
     op.create_index(op.f('ix_user_sessions_token_id'), 'user_sessions', ['token_id'], unique=True)
-    op.drop_index(op.f('ix_auth_session_tokens_auth_session_id'), table_name='auth_session_tokens')
     op.drop_table('auth_session_tokens')
     op.drop_table('auth_sessions')
     # ### end Alembic commands ###
