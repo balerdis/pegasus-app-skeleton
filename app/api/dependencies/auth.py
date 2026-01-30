@@ -27,6 +27,9 @@ def get_jwt_token_service() -> JwtTokenService:
         access_token_ttl=timedelta(
             minutes=settings.JWT_ACCESS_TOKEN_TTL_MINUTES
         ),        
+        refresh_token_ttl=timedelta(
+            minutes=settings.JWT_REFRESH_TOKEN_TTL_MINUTES
+        )
     )
 
 def get_password_hasher() -> PasswordHasher:
@@ -40,13 +43,6 @@ def get_auth_service(
         token_service=token_service,
         password_hasher=password_hasher,
     )
-
-def require_authentication(
-    token: str = Depends(get_bearer_token),
-    token_service: JwtTokenService = Depends(get_jwt_token_service),
-):
-    payload = token_service.decode_and_validate(token=token)
-    return payload
 
 def require_authenticated_identity(
     token: str = Depends(get_bearer_token),

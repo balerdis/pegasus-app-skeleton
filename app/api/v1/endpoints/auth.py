@@ -1,12 +1,12 @@
 # app/api/v1/auth/login.py
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from pegasus_framework.auth.services.auth_service import AuthService
 
 from app.api.v1.schemas.auth.login import LoginRequest
 from app.api.v1.schemas.auth.responses import LoginResponse
 
 from app.api.dependencies.auth import get_auth_service, get_bearer_token
-
+from pegasus_framework.auth.dependencies.build_auth_request_context import build_auth_request_context
 
 
 router = APIRouter()
@@ -18,21 +18,25 @@ router = APIRouter()
 )
 def login(
     payload: LoginRequest,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> LoginResponse:
     """
     Autentica un usuario y retorna un JWT válido.
     """
-
+    ctx = build_auth_request_context(request=request)
     result = auth_service.login(
         identifier=payload.email,
         password=payload.password,
+        context=ctx
     )
 
     return LoginResponse(
         access_token=result.access_token,
         token_type=result.token_type,
         expires_at=result.expires_at,
+        refresh_token=result.refresh_token,
+        refresh_token_expires_at=result.refresh_token_expires_at
     )
 
 @router.post(
