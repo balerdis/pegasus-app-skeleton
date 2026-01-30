@@ -6,7 +6,8 @@ from pegasus_framework.auth.security.tokens.jwt_token_service import JwtTokenSer
 from pegasus_framework.auth.security.hash_password import PasswordHasher
 from app.config.config import config as settings   
 from pegasus_framework.auth.services.auth_service import AuthService
-
+from pegasus_framework.core.time.clock import Clock
+from pegasus_framework.core.time.timezones import BUENOS_AIRES
 
 security = HTTPBearer(auto_error=False)
 
@@ -48,7 +49,7 @@ def require_authenticated_identity(
     token: str = Depends(get_bearer_token),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> int:
-    return auth_service.authenticate(token=token)
+    return auth_service.authenticate(token=token, now=Clock.now(BUENOS_AIRES))
 
 
 
