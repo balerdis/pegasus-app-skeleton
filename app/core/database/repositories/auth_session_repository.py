@@ -20,10 +20,11 @@ class AuthSessionRepository(AuthSessionRepositoryBase):
     def __init__(self, session: Session):
         self.session = session
 
+
     def create(
         self,
         *,
-        status: str,
+        status: str = "active",
         last_activity_at: datetime,
         expires_at: datetime,
         user_id: int,
@@ -54,15 +55,18 @@ class AuthSessionRepository(AuthSessionRepositoryBase):
             select(AuthSession).where(AuthSession.token_id == token_id).where(AuthSession.expires_at > now)
         )
     
-    def revoke(self, *, access_token_id, revoked_at = datetime.now(datetime.timezone.utc)):
+    def revoke(self, 
+               access_token_jti: str, 
+               revoked_at: datetime
+               ):
         self.session.execute(
-            update(AuthSession).where(AuthSession.token_id == access_token_id).values(revoked_at=revoked_at)
+            update(AuthSession).where(AuthSession.token_jti == access_token_jti).values(revoked_at=revoked_at)
         )
         self.session.flush()
 
         return
 
-    def revoke_all_for_user(self, *, user_id, revoked_at = datetime.now(datetime.timezone.utc)):
+    def revoke_all_for_user(self, *, user_id, revoked_at: datetime):
         self.session.execute(
             update(AuthSession).where(AuthSession.user_id == user_id).values(revoked_at=revoked_at)
         )
