@@ -42,53 +42,39 @@ class AuthSessionTokenRepository(AuthSessionTokenRepositoryBase, BaseRepository[
         return session
     
     def revoke(self, *, 
-               token_id: str, 
+               token_jti: str, 
                revoked_at: datetime
                ):
         self.session.execute(
-            update(AuthSessionToken).where(AuthSessionToken.token_id == token_id).values(revoked_at=revoked_at)
+            update(AuthSessionToken).where(AuthSessionToken.token_jti == token_jti).values(revoked_at=revoked_at)
         )
         self.session.flush()
 
         return
     
-    def get_valid_by_token_id(self, *, 
-                              token_id: str, 
-                              now: datetime
-                              ):
-        return self.session.scalar(
-            select(AuthSessionToken).where(AuthSessionToken.token_id == token_id).where(AuthSessionToken.expires_at > now)
+    def revoke_by_auth_session_id(self, *, 
+                                  auth_session_id: int, 
+                                  revoked_at: datetime
+                                  ):
+        self.session.execute(
+            update(AuthSessionToken).where(AuthSessionToken.auth_session_id == auth_session_id).values(revoked_at=revoked_at)
         )
+        self.session.flush()
+
+        return
     
-    def get_valid_by_refresh_token_id(self, *, 
-                                      token_id: str, 
-                                      now: datetime
-                                      ):
+       
+    
+    def get_valid_access_token(
+        self,
+        *,
+        token_jti: str,
+        now: datetime,
+    ) -> AuthSessionToken | None:
         return self.session.scalar(
-            select(AuthSessionToken).where(AuthSessionToken.token_id == token_id).where(AuthSessionToken.expires_at > now)
-        )
-    
-    def get_valid_by_access_token_id(self, *, 
-                                     token_id: str, 
-                                     now: datetime
-                                     ):
-        return self.session.scalar(
-            select(AuthSessionToken).where(AuthSessionToken.token_id == token_id).where(AuthSessionToken.expires_at > now)
-        )
-    
-    def get_all_by_user_id(self, 
-                           *, 
-                           user_id: int
-                           ):
-        return self.session.scalars(
-            select(AuthSessionToken).where(AuthSessionToken.user_id == user_id)
-        ).all()
-    
-    def get_all_by_token_type_and_user_id(self, 
-                                          *, 
-                                          token_type: TokenType, 
-                                          user_id: int
-                                          ):
-        return self.session.scalars(
-            select(AuthSessionToken).where(AuthSessionToken.token_type == token_type.value).where(AuthSessionToken.user_id == user_id)
-        ).all()
+            select(AuthSessionToken)
+            .where(AuthSessionToken.token_jti == token_jti)
+            .where(AuthSessionToken.token_type == TokenType.ACCESS)
+            .where(AuthSessionToken.expires_at > now)
+            .where(AuthSessionToken.revoked_at.is_(None))
+        )    

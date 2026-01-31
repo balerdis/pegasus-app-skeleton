@@ -45,22 +45,15 @@ class AuthSessionRepository(AuthSessionRepositoryBase):
 
         return session   
     
-    def get_valid_by_token_id(
-        self,
-        *,
-        token_id: str,
-        now: datetime,
-    ) -> AuthSession:
-        return self.session.scalar(
-            select(AuthSession).where(AuthSession.token_id == token_id).where(AuthSession.expires_at > now)
-        )
+    def get_by_id(self, *, session_id: int) -> AuthSession | None:
+        return self.session.get(AuthSession, session_id)
     
-    def revoke(self, 
-               access_token_jti: str, 
+    def revoke_by_id(self, 
+               id: int, 
                revoked_at: datetime
                ):
         self.session.execute(
-            update(AuthSession).where(AuthSession.token_jti == access_token_jti).values(revoked_at=revoked_at)
+            update(AuthSession).where(AuthSession.id == id).values(revoked_at=revoked_at)
         )
         self.session.flush()
 
