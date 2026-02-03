@@ -47,7 +47,7 @@ def logout(
     token: str = Depends(get_bearer_token),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> None:
-    auth_service.logout(token=token)
+    auth_service.logout(access_token=token)
 
 
 
