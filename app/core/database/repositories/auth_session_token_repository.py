@@ -74,7 +74,7 @@ class AuthSessionTokenRepository(AuthSessionTokenRepositoryBase, BaseRepository[
         return self.session.scalar(
             select(AuthSessionToken)
             .where(AuthSessionToken.token_jti == token_jti)
-            .where(AuthSessionToken.token_type == TokenType.ACCESS)
+            .where(AuthSessionToken.token_type == TokenType.ACCESS.value)
             .where(AuthSessionToken.expires_at > now)
             .where(AuthSessionToken.revoked_at.is_(None))
         )    
