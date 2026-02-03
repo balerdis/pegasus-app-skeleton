@@ -24,14 +24,12 @@ class AuthSessionRepository(AuthSessionRepositoryBase):
     def create(
         self,
         *,
-        status: str = "active",
         last_activity_at: datetime,
         expires_at: datetime,
         user_id: int,
         context: AuthRequestContext | None = None
     ) -> AuthSession:
         session = AuthSession(
-            status=status,
             last_activity_at=last_activity_at,
             expires_at=expires_at,
             ip_address=context.ip_address,
