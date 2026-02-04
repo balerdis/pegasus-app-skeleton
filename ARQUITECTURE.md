@@ -223,9 +223,10 @@ La aplicación:
 
 El framework nunca implementa lógica de negocio asociada al dominio User.
 
-# 11 Sesion Persistence
- - Toda sesión autenticada persistente debe tener representación en base de datos.
- - No se admiten JWT “stateless puros” para usuarios autenticados.
+# 11 Session Persistence
+ - Este skeleton utiliza el modelo de sesiones persistentes definido por pegasus-framework.
+ - No se admiten JWT stateless puros para usuarios autenticados.
+
 
 # 12 ## Unit of Work & Transaction Management Policy
 
@@ -371,6 +372,9 @@ El paquete `jwt` (pip) no es compatible y no debe utilizarse.
 
 ## 16.1 Principio fundamental
 
+Este sistema adopta íntegramente el modelo de autenticación definido por pegasus-framework.
+Las siguientes reglas describen cómo dicho modelo se expone y utiliza en una aplicación HTTP.
+
 Autenticación, identidad y autorización son responsabilidades distintas y no deben confundirse.
 
 Un endpoint debe exigir **únicamente el nivel de protección que realmente necesita**.
@@ -447,3 +451,64 @@ Sobrecargar un endpoint con identidad cuando no es requerida se considera un err
   - `get_current_user`
 
 Cada endpoint debe declarar explícitamente cuál necesita.
+
+
+## 17. Autenticación HTTP
+
+La aplicación expone el sistema de autenticación del framework mediante endpoints HTTP REST, siguiendo convenciones claras y desacopladas de la lógica de negocio.
+
+### Endpoints de autenticación
+
+#### POST `/auth/login`
+
+- Autentica al usuario mediante credenciales.
+- Crea una nueva sesión persistente.
+- Retorna:
+  - access token
+  - refresh token
+  - fechas de expiración
+
+El endpoint:
+- Construye un `AuthRequestContext` (IP, User-Agent, idioma).
+- No contiene lógica de autenticación.
+- Delegar completamente en `AuthService`.
+
+#### POST `/auth/refresh`
+
+- Recibe un refresh token válido.
+- No requiere access token activo.
+- Emite un nuevo par de tokens (access + refresh).
+- Invalida el refresh token anterior.
+
+Si se detecta reutilización del refresh token:
+- la sesión completa es revocada
+- se responde con error de autenticación
+
+#### POST `/auth/logout`
+
+- Revoca la sesión asociada al access token recibido.
+- El logout es idempotente.
+- La política actual requiere un access token válido para ejecutar logout.
+
+### Uso de Access Token
+
+- El access token se envía mediante `Authorization: Bearer <token>`.
+- Cada request protegida:
+  - valida el JWT
+  - valida la sesión persistente
+  - verifica que el `sub` coincida con la sesión
+
+### Convenciones de seguridad
+
+- El access token es de corta duración.
+- El refresh token es de mayor duración y solo se usa en `/auth/refresh`.
+- No se confía únicamente en el JWT: toda autenticación valida sesión.
+
+### Responsabilidades de la aplicación
+
+- Definir endpoints HTTP.
+- Definir schemas de request / response.
+- Inyectar dependencias del framework.
+- Decidir políticas de UX (por ejemplo, logout con token expirado).
+
+La aplicación **no implementa reglas de autenticación**, solo expone y consume las capacidades del framework.
