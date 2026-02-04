@@ -1,4 +1,18 @@
+Copyright (c) 2025 balerdis
+
 # pegasus-app-skeleton
+## License
+
+pegasus-app-skeleton is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+
+Any application built using this skeleton and offered as a network service
+must make its complete source code available under the same license.
+
+### Commercial use
+
+If you want to build a closed-source or proprietary application using this
+skeleton, you must obtain a commercial license.
+
 
 ## Propósito
 
