@@ -1,3 +1,4 @@
+# Copyright (c) 2025 balerdis
 # app/core/database/repositories/movie_repository.py
 from pegasus_framework.db.repositories.base_repository import BaseRepository
 
