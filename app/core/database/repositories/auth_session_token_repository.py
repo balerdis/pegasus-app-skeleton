@@ -41,17 +41,6 @@ class AuthSessionTokenRepository(AuthSessionTokenRepositoryBase, BaseRepository[
 
         return session
     
-    def revoke(self, *, 
-               token_jti: str, 
-               revoked_at: datetime
-               ):
-        self.session.execute(
-            update(AuthSessionToken).where(AuthSessionToken.token_jti == token_jti).values(revoked_at=revoked_at)
-        )
-        self.session.flush()
-
-        return
-    
     def revoke_by_auth_session_id(self, *, 
                                   auth_session_id: int, 
                                   revoked_at: datetime
@@ -78,3 +67,54 @@ class AuthSessionTokenRepository(AuthSessionTokenRepositoryBase, BaseRepository[
             .where(AuthSessionToken.expires_at > now)
             .where(AuthSessionToken.revoked_at.is_(None))
         )    
+    
+    def get_valid_refresh_token(
+        self,
+        *,
+        token_jti: str,
+        now: datetime,
+    ) -> AuthSessionToken | None:
+        return self.session.scalar(
+            select(AuthSessionToken)
+            .where(AuthSessionToken.token_jti == token_jti)
+            .where(AuthSessionToken.token_type == TokenType.REFRESH.value)
+            .where(AuthSessionToken.expires_at > now)
+            .where(AuthSessionToken.revoked_at.is_(None))
+        )
+    
+    def get_valid_by_token_jti(
+        self,
+        *,
+        token_jti: str,
+        now: datetime,
+        token_type: str
+    ) -> AuthSessionToken | None:
+        return self.session.scalar(
+            select(AuthSessionToken)
+            .where(AuthSessionToken.token_jti == token_jti)
+            .where(AuthSessionToken.expires_at > now)
+            .where(AuthSessionToken.revoked_at.is_(None))
+            .where(AuthSessionToken.token_type == token_type)
+        )
+
+    def update_refresh_token_replaced_by(
+        self,
+        *,
+        refresh_token_jti: str,
+        replaced_by_token_jti: str,
+    ) -> None:
+        self.session.execute(
+            update(AuthSessionToken).where(AuthSessionToken.token_jti == refresh_token_jti).values(replaced_by_token=replaced_by_token_jti)
+        )
+        self.session.flush()
+
+    def revoke_by_token_jti(self, 
+           token_jti: str, 
+           revoked_at: datetime
+           ):
+        self.session.execute(
+            update(AuthSessionToken).where(AuthSessionToken.token_jti == token_jti).values(revoked_at=revoked_at)
+        )
+        self.session.flush()
+
+        return

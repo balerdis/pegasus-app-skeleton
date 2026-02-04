@@ -18,12 +18,6 @@ class AuthSession(
     """
     __tablename__ = "auth_sessions"
 
-    sessions = relationship(
-        "AuthSessionToken",
-        back_populates="auth_session",
-        cascade="all, delete-orphan"
-    )    
-
     tokens = relationship(
         "AuthSessionToken",
         back_populates="auth_session",
