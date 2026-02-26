@@ -1,9 +1,8 @@
 # app/core/database/repositories/auth_session_repository.py
 from pegasus_framework.db.repositories.auth.sessions.auth_session_repository_base import AuthSessionRepositoryBase
 from datetime import datetime
-from typing import Optional
 
-from sqlalchemy import select, update
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
 
