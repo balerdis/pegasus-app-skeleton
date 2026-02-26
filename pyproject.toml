@@ -1,4 +1,4 @@
 [project]
 dependencies = [
-  "platform-framework>=0.1.0"
+  "platform-framework>=0.1.0,<1.0.0"
 ]
