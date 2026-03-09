@@ -30,7 +30,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 from app.core.database.models.base import Base
 from app.core.database.models import *
-from app.core.database.models.auth import *
+from app.core.database.models.auth.sessions import *
+from app.core.database.models.auth.roles_permissions import *
 
 target_metadata = Base.metadata
 
