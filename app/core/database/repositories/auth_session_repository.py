@@ -6,7 +6,7 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
 
-from app.core.database.models.auth.auth_session import AuthSession
+from app.core.database.models.auth.sessions.auth_session import AuthSession
 class AuthSessionRepository(AuthSessionRepositoryBase):
     """
     Implementación concreta del AuthSessionRepositoryBase usando SQLAlchemy.

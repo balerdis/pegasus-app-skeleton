@@ -3,8 +3,8 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database.models.base import Base
-from app.core.database.models.auth.auth_session import AuthSession
-from pegasus_framework.db.models.auth.session.auth_session_tokens_base import AuthSessionTokensBase
+from app.core.database.models.auth.sessions.auth_session import AuthSession
+from pegasus_framework.db.models.auth.sessions.auth_session_tokens_base import AuthSessionTokensBase
 
 class AuthSessionToken(Base, AuthSessionTokensBase):
     __tablename__ = "auth_session_tokens"

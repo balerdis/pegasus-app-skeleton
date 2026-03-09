@@ -8,7 +8,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from typing import Dict, Any
 
-from app.core.database.models.auth.auth_session_token import AuthSessionToken
+from app.core.database.models.auth.sessions.auth_session_token import AuthSessionToken
 from pegasus_framework.db.repositories.base_repository import BaseRepository
 from pegasus_framework.business.domain.auth.token_type import TokenType
 

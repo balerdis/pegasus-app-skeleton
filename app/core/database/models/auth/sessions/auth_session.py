@@ -1,6 +1,6 @@
 # app/core/database/models/auth/auth_session.py
 from app.core.database.models.base import Base
-from pegasus_framework.db.models.auth.session.auth_session_base import AuthSessionBase
+from pegasus_framework.db.models.auth.sessions.auth_session_base import AuthSessionBase
 from pegasus_framework.db.models.mixins import AuditMixin
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from sqlalchemy import ForeignKey
