@@ -7,6 +7,8 @@ from pegasus_framework.auth.security.hash_password import PasswordHasher
 from app.api.v1.schemas.users.responses import UserResponse
 from pegasus_framework.core.exceptions.domain import DuplicateEntityError
 from app.core.services.dto.user.user_create_dto import UserUpdateDTO
+from app.api.v1.schemas.users.user_roles_update import UserRolesUpdateRequest
+from app.core.database.repositories.role_repository import RoleRepository
 
 class UserService(SqlAlchemyService):
 
@@ -67,6 +69,21 @@ class UserService(SqlAlchemyService):
             uow.commit()
             return self._map_user_to_response(entity)
 
+    def update_roles(self, id: int, data: UserRolesUpdateRequest) -> UserResponse:
+        with self._uow() as uow:
+            user_repo = uow.repo(UserRepository)
+            role_repo = uow.repo(RoleRepository)
+            
+            user = user_repo.get_by_id_or_fail(id)
+            
+            user.roles.clear()
+            for role_id in data.role_ids:
+                role = role_repo.get_by_id_or_fail(role_id)
+                user.roles.append(role)
+            
+            uow.commit()
+            return self._map_user_to_response(user)
+
     def delete_by_id(self, id: int, confirm: bool = True) -> None:
         with self._uow() as uow:
             repo = uow.repo(UserRepository)
@@ -79,7 +96,10 @@ class UserService(SqlAlchemyService):
             id=m.id,
             email=m.email,
             name=m.name,
-            habilited=m.habilited
+            habilited=m.habilited,
+            roles=[
+                {"id": r.id, "code": r.code} for r in m.roles
+            ] if m.roles else []
         )
     
  
