@@ -4,7 +4,7 @@ from app.core.services.dto.user.user_create_dto import UserCreateDTO, UserUpdate
 from app.core.services.user_service import UserService
 from pegasus_framework.api.v1.schemas.generic import ApiResponse
 from app.api.v1.schemas.users.responses import UserResponse, DeleteUserResponse
-from app.core.services.user_service import UserService
+from app.api.v1.schemas.users.user_roles_update import UserRolesUpdateRequest
 from app.api.dependencies.auth import require_authenticated_identity
 from app.api.dependencies.current_user import get_current_user
 from app.core.database.models.users import User
@@ -61,7 +61,7 @@ def get_users():
 # ###################GET USER BY ID###################
 @protected_router.get("/{id}", 
             response_model=ApiResponse[UserResponse],
-            description="Devuelve un genero por id",
+            description="Devuelve un usuario por id",
             status_code=status.HTTP_200_OK
             )
 def get_by_id(id: int):
@@ -78,7 +78,7 @@ def get_by_id(id: int):
 # ####################UPDATE USER###################
 @protected_router.patch("/{id}", 
             response_model=ApiResponse[UserResponse],
-            description="Actualiza un genero",
+            description="Actualiza un usuario",
             status_code=status.HTTP_200_OK
             )
 def update_by_id(
@@ -90,7 +90,27 @@ def update_by_id(
 
     return ApiResponse(
         status="success",
-        message="Genero actualizado correctamente",
+        message="Usuario actualizado correctamente",
+        errors=[],
+        data=UserResponse.model_validate(updated)
+    )
+
+# ####################UPDATE USER ROLES###################
+@protected_router.patch("/{id}/roles", 
+            response_model=ApiResponse[UserResponse],
+            description="Actualiza los roles de un usuario",
+            status_code=status.HTTP_200_OK
+            )
+def update_user_roles(
+    id: int, 
+    request: UserRolesUpdateRequest,
+):
+    service = UserService()
+    updated = service.update_roles(id, request)
+
+    return ApiResponse(
+        status="success",
+        message="Roles actualizados correctamente",
         errors=[],
         data=UserResponse.model_validate(updated)
     )
@@ -98,7 +118,7 @@ def update_by_id(
 # ####################DELETE USER###################
 @protected_router.delete("/{id}", 
             response_model=ApiResponse[DeleteUserResponse],
-            description="Elimina un genero",
+            description="Elimina un usuario",
             status_code=status.HTTP_200_OK
             )
 def delete_by_id(
@@ -110,7 +130,7 @@ def delete_by_id(
 
     return ApiResponse(
         status="success",
-        message="Genero eliminado correctamente",
+        message="Usuario eliminado correctamente",
         errors=[],
         data=DeleteUserResponse(id=id)
     )
