@@ -8,6 +8,8 @@ from app.api.v1.endpoints.movies import router as api_router_movies
 from app.api.v1.endpoints.genres import router as api_router_genres
 from app.api.v1.endpoints.users import protected_router as api_router_users
 from app.api.v1.endpoints.auth import router as api_router_auth
+from app.api.v1.endpoints.permissions import router as api_router_permissions
+from app.api.v1.endpoints.roles import router as api_router_roles
 from pegasus_framework.api.system.router import router as system_router
 from pegasus_framework.api.exceptions.registry_all import register_all_exception_handlers
 from app.wiring.bootstrap import bootstrap_application
@@ -89,6 +91,8 @@ def create_app() -> FastAPI:
     v1_router.include_router(api_router_genres, tags=["GENRES"], prefix="/genres")
     v1_router.include_router(api_router_auth, tags=["AUTH"], prefix="/auth")
     v1_router.include_router(api_router_users, tags=["USERS"], prefix="/users")
+    v1_router.include_router(api_router_permissions, tags=["PERMISSIONS"], prefix="/permissions")
+    v1_router.include_router(api_router_roles, tags=["ROLES"], prefix="/roles")
     logger.info("V1 Routers configurated")
 
     app.include_router(system_router)
